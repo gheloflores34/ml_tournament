@@ -1,0 +1,41 @@
+{
+  // ============================================
+  // VSCode Workspace Settings
+  // Mobile Legends Tournament System
+  // ============================================
+
+  // PHP
+  "php.validate.enable": true,
+  "php.suggest.basic": true,
+  "[php]": {
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
+
+  // SQL highlighting
+  "[sql]": {
+    "editor.tabSize": 2,
+    "editor.wordWrap": "on"
+  },
+
+  // General
+  "editor.fontSize": 14,
+  "editor.fontFamily": "'Fira Code', 'Cascadia Code', monospace",
+  "editor.fontLigatures": true,
+  "editor.rulers": [100],
+  "editor.bracketPairColorization.enabled": true,
+  "files.eol": "\n",
+
+  // File associations
+  "files.associations": {
+    "*.php": "php",
+    "*.sql": "sql"
+  },
+
+  // Live Server settings (for local dev)
+  "liveServer.settings.port": 5500,
+  "liveServer.settings.root": "/",
+
+  // Explorer
+  "explorer.compactFolders": false
+}

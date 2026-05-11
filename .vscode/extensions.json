@@ -1,0 +1,24 @@
+{
+  // ============================================
+  // Recommended VSCode Extensions
+  // Install via: Extensions panel (Ctrl+Shift+X)
+  // ============================================
+  "recommendations": [
+    // PHP
+    "bmewburn.vscode-intelephense-client",   // PHP IntelliSense
+    "felixfbecker.php-debug",                // PHP Xdebug
+    "MehediDracula.php-namespace-resolver",  // PHP Namespace
+
+    // SQL / Database (NO LOGIN NEEDED)
+    "cweijan.vscode-database-client2",       // DB Client - connect MySQL locally
+    "mtxr.sqltools",                         // SQLTools
+    "mtxr.sqltools-driver-mysql",            // SQLTools MySQL driver
+
+    // General
+    "esbenp.prettier-vscode",                // Code formatter
+    "ritwickdey.LiveServer",                 // Live preview
+    "formulahendry.auto-close-tag",          // Auto close HTML tags
+    "PKief.material-icon-theme",             // File icons
+    "ms-vscode.vscode-json"                  // JSON support
+  ]
+}
