@@ -894,7 +894,7 @@ function resetLogo(fileId, prevId, zoneId, lblId) {
 }
 
 /* ════════════════════════════════════════════
-   MODAL HELPERS
+   MODAL HELPERS yes
 ════════════════════════════════════════════ */
 function openOv(id)   { document.getElementById(id).classList.add('open'); }
 function closeOv(id)  { document.getElementById(id).classList.remove('open'); }

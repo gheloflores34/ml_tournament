@@ -1,7 +1,7 @@
 -- ============================================
 -- Mobile Legends Tournament System
 -- Database Setup Script
--- Run this in MySQL / phpMyAdmin / VSCode DB
+-- Run this in MySQL / phpMyAdmin / VSCode DB  HEHEHEHEHE
 -- ============================================
 
 CREATE DATABASE IF NOT EXISTS ml_tournament
