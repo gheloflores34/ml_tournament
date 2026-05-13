@@ -703,3 +703,4 @@ label.lbl{
   display:flex;align-items:center;justify-content:center;
   font-size:1.6rem;margin:0 auto 14px;
 }
+    }
