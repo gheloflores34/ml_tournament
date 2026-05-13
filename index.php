@@ -1045,3 +1045,441 @@ async function loadRounds() {
     sel.appendChild(o);
   });
 }
+/* ════════════════════════════════════════════
+   LOAD & RENDER MATCH TABLE
+════════════════════════════════════════════ */
+async function loadMatches() {
+  var search = document.getElementById('q').value.trim();
+  var round  = document.getElementById('rf').value;
+  var d = await api('api.php?action=list&' + new URLSearchParams({ search: search, round: round }));
+  var rows = Array.isArray(d.data) ? d.data : [];
+  renderStats(rows);
+  renderTable(rows);
+}
+
+function renderStats(rows) {
+  document.getElementById('sTotal').textContent  = rows.length;
+  var rds = {}, tms = {};
+  rows.forEach(function (r) { rds[r.round] = 1; tms[r.team_a] = 1; tms[r.team_b] = 1; });
+  document.getElementById('sRounds').textContent = Object.keys(rds).length;
+  document.getElementById('sTeams').textContent  = Object.keys(tms).length;
+}
+
+function renderTable(rows) {
+  var tb = document.getElementById('tbl');
+  if (!rows.length) {
+    tb.innerHTML = '<tr><td colspan="8"><div class="empty-row"><div class="ei">🏆</div><p>No matches found.</p></div></td></tr>';
+    return;
+  }
+  tb.innerHTML = rows.map(function (m, i) {
+    var avA  = m.team_a_img ? '<img class="av" src="uploads/' + xe(m.team_a_img) + '" alt="">' : '<div class="av-ph">' + ini(m.team_a) + '</div>';
+    var avB  = m.team_b_img ? '<img class="av" src="uploads/' + xe(m.team_b_img) + '" alt="">' : '<div class="av-ph">' + ini(m.team_b) + '</div>';
+    var wico = (m.winner === m.team_a && m.team_a_img) ? '<img src="uploads/' + xe(m.team_a_img) + '" alt="">'
+             : (m.winner === m.team_b && m.team_b_img) ? '<img src="uploads/' + xe(m.team_b_img) + '" alt="">'
+             : '🏆';
+    var safeLabel = (xe(m.team_a) + ' vs ' + xe(m.team_b)).replace(/'/g, '&#39;');
+    return '<tr>'
+      + '<td style="color:var(--muted);font-family:\'Orbitron\',sans-serif;font-size:.6rem">#' + (i + 1) + '</td>'
+      + '<td><div class="tc">' + avA + '<span>' + xe(m.team_a) + '</span></div></td>'
+      + '<td><span style="color:var(--border2);font-family:\'Orbitron\',sans-serif;font-size:.6rem;letter-spacing:.1em">VS</span></td>'
+      + '<td><div class="tc">' + avB + '<span>' + xe(m.team_b) + '</span></div></td>'
+      + '<td><div class="sc"><span class="sc-n">' + m.score_a + '</span><span class="sc-s">:</span><span class="sc-n">' + m.score_b + '</span></div></td>'
+      + '<td><span class="wb" onclick="openDetail(' + m.id + ')" title="View scoreboard">' + wico + ' ' + xe(m.winner) + '</span></td>'
+      + '<td><span class="rb">' + xe(m.round) + '</span></td>'
+      + '<td style="white-space:nowrap">'
+          + '<button class="btn btn-sm btn-view" onclick="openDetail(' + m.id + ')">🔍</button>'
+          + '<button class="btn btn-sm btn-edit" onclick="openEdit(' + m.id + ')" style="margin-left:5px">✎ Edit</button>'
+          + '<button class="btn btn-sm btn-del"  onclick="openDelete(' + m.id + ',\'' + safeLabel + '\')" style="margin-left:5px">🗑</button>'
+      + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+/* ════════════════════════════════════════════
+   DETAIL MODAL
+════════════════════════════════════════════ */
+async function openDetail(id) {
+  setDetailHeader(null);
+  document.getElementById('dBody').innerHTML = '<div class="empty-row" style="padding:36px"><span class="spin"></span></div>';
+  openOv('ovDetail');
+
+  var results = await Promise.all([
+    api('api.php?action=get&id=' + id),
+    api('api.php?action=get_players&id=' + id)
+  ]);
+  var md = results[0];
+  var pd = results[1];
+
+  if (md.error) { toast(md.error, 'err'); closeOv('ovDetail'); return; }
+
+  var m       = md.data;
+  var players = Array.isArray(pd.data) ? pd.data : [];
+
+  setDetailHeader(m);
+
+  var elSA = document.getElementById('dSA');
+  var elSB = document.getElementById('dSB');
+  elSA.textContent = m.score_a;
+  elSB.textContent = m.score_b;
+  elSA.className   = 'd-sv ' + (m.winner === m.team_a ? 'win' : 'lose');
+  elSB.className   = 'd-sv ' + (m.winner === m.team_b ? 'win' : 'lose');
+  document.getElementById('dWinner').textContent = m.winner;
+
+  var pA   = players.filter(function (p) { return p.team_side === 'A'; });
+  var pB   = players.filter(function (p) { return p.team_side === 'B'; });
+  var html = buildSbSection(m.team_a, 'ta', pA)
+           + buildSbSection(m.team_b, 'tb', pB);
+  document.getElementById('dBody').innerHTML = html;
+}
+
+function setDetailHeader(m) {
+  var imgA = document.getElementById('dLogoA');
+  var phA  = document.getElementById('dLogoPHA');
+  var imgB = document.getElementById('dLogoB');
+  var phB  = document.getElementById('dLogoPHB');
+
+  if (!m) {
+    imgA.style.display = 'none'; phA.style.display = 'flex'; phA.textContent = '?';
+    imgB.style.display = 'none'; phB.style.display = 'flex'; phB.textContent = '?';
+    document.getElementById('dNameA').textContent = '—';
+    document.getElementById('dNameB').textContent = '—';
+    return;
+  }
+
+  document.getElementById('dNameA').textContent = m.team_a;
+  document.getElementById('dNameB').textContent = m.team_b;
+
+  if (m.team_a_img) {
+    imgA.src = 'uploads/' + m.team_a_img;
+    imgA.style.display = 'block'; phA.style.display = 'none';
+  } else {
+    imgA.style.display = 'none'; phA.style.display = 'flex'; phA.textContent = ini(m.team_a);
+  }
+  if (m.team_b_img) {
+    imgB.src = 'uploads/' + m.team_b_img;
+    imgB.style.display = 'block'; phB.style.display = 'none';
+  } else {
+    imgB.style.display = 'none'; phB.style.display = 'flex'; phB.textContent = ini(m.team_b);
+  }
+}
+
+function buildSbSection(teamName, cls, players) {
+  var filled = players.filter(function (p) { return p.ign || p.hero_img; });
+  var rows = '';
+  if (!filled.length) {
+    rows = '<div class="sb-empty">No player data yet — use Edit to add details.</div>';
+  } else {
+    filled.forEach(function (p) {
+      var hero = p.hero_img
+        ? '<img class="sb-hero" src="uploads/' + xe(p.hero_img) + '" alt="">'
+        : '<div class="sb-hero-ph">🧙</div>';
+      rows += '<div class="sb-row">'
+        + hero
+        + '<div><div class="sb-ign">' + xe(p.ign || '—') + '</div></div>'
+        + '<div><div class="sb-kda">' + (+p.kills) + '/' + (+p.deaths) + '/' + (+p.assists) + '</div>'
+             + '<div class="sb-kl">K / D / A</div></div>'
+        + '</div>';
+    });
+  }
+  return '<div class="sb-sec">'
+    + '<div class="sb-th ' + cls + '">' + xe(teamName) + '</div>'
+    + '<div class="sb-cols"><span>Hero</span><span>Player IGN</span><span style="text-align:center">K / D / A</span></div>'
+    + rows
+    + '</div>';
+}
+
+/* ════════════════════════════════════════════
+   ADD / EDIT MODAL
+════════════════════════════════════════════ */
+function openCreate() {
+  gEditId = null;
+  document.getElementById('fmTitle').textContent = 'Add Match';
+  document.getElementById('fA').value  = '';
+  document.getElementById('fB').value  = '';
+  document.getElementById('fSA').value = '0';
+  document.getElementById('fSB').value = '0';
+  document.getElementById('fR').value  = '';
+  resetLogo('ufA', 'upA', 'uzA', 'ulA');
+  resetLogo('ufB', 'upB', 'uzB', 'ulB');
+  syncW();
+  document.getElementById('pSection').style.display = 'none';
+  openOv('ovForm');
+}
+
+async function openEdit(id) {
+  var d = await api('api.php?action=get&id=' + id);
+  if (d.error) { toast(d.error, 'err'); return; }
+  var m = d.data;
+  gEditId = +m.id;
+
+  document.getElementById('fmTitle').textContent = 'Edit Match';
+  document.getElementById('fA').value  = m.team_a;
+  document.getElementById('fB').value  = m.team_b;
+  document.getElementById('fSA').value = m.score_a;
+  document.getElementById('fSB').value = m.score_b;
+  document.getElementById('fR').value  = m.round;
+
+  resetLogo('ufA', 'upA', 'uzA', 'ulA');
+  resetLogo('ufB', 'upB', 'uzB', 'ulB');
+  if (m.team_a_img) setLogoPreview('upA', 'uzA', 'ulA', 'uploads/' + m.team_a_img);
+  if (m.team_b_img) setLogoPreview('upB', 'uzB', 'ulB', 'uploads/' + m.team_b_img);
+
+  syncW(m.winner);
+  document.getElementById('pSection').style.display = 'block';
+  openOv('ovForm');
+
+  var pd = await api('api.php?action=get_players&id=' + gEditId);
+  renderPlayerEditor(pd.data || [], m.team_a, m.team_b);
+}
+
+/* Save match */
+async function saveMatch() {
+  var tA = document.getElementById('fA').value.trim();
+  var tB = document.getElementById('fB').value.trim();
+  var sA = document.getElementById('fSA').value;
+  var sB = document.getElementById('fSB').value;
+  var w  = document.getElementById('fW').value;
+  var r  = document.getElementById('fR').value.trim();
+
+  if (!tA || !tB || !w || !r) { toast('Please fill in all required fields.', 'err'); return; }
+
+  var btn = document.getElementById('btnSave');
+  btn.innerHTML = '<span class="spin"></span> Saving…'; btn.disabled = true;
+
+  var fd = new FormData();
+  if (gEditId) fd.append('id', gEditId);
+  fd.append('team_a', tA); fd.append('team_b', tB);
+  fd.append('score_a', sA); fd.append('score_b', sB);
+  fd.append('winner', w); fd.append('round', r);
+
+  var ufA = document.getElementById('ufA'), ufB = document.getElementById('ufB');
+  if (ufA.files && ufA.files.length) fd.append('team_a_img', ufA.files[0]);
+  if (ufB.files && ufB.files.length) fd.append('team_b_img', ufB.files[0]);
+
+  var action = gEditId ? 'update' : 'create';
+  var d = await api('api.php?action=' + action, { method: 'POST', body: fd });
+
+  btn.innerHTML = 'Save Match'; btn.disabled = false;
+  if (d.error) { toast(d.error, 'err'); return; }
+
+  if (!gEditId && d.id) {
+    gEditId = +d.id;
+    document.getElementById('pSection').style.display = 'block';
+    var pd = await api('api.php?action=get_players&id=' + gEditId);
+    renderPlayerEditor(pd.data || [], tA, tB);
+    toast('Match saved! Scroll down to add player details.', 'ok');
+  } else {
+    toast('Match updated!', 'ok');
+    loadMatches(); loadRounds();
+  }
+}
+
+/* ════════════════════════════════════════════
+   PLAYER EDITOR
+════════════════════════════════════════════ */
+function renderPlayerEditor(players, nameA, nameB) {
+  document.getElementById('ptA').textContent = (nameA || 'Team A');
+  document.getElementById('ptB').textContent = (nameB || 'Team B');
+
+  var map = {};
+  players.forEach(function (p) { map[p.team_side + '_' + p.slot] = p; });
+
+  ['A', 'B'].forEach(function (side) {
+    var box  = document.getElementById('pg' + side);
+    var html = '';
+    for (var slot = 1; slot <= 5; slot++) {
+      var k = side + '_' + slot;
+      var p = map[k] || { ign: '', kills: 0, deaths: 0, assists: 0, hero_img: null };
+
+      var hasImg  = p.hero_img ? ' got' : '';
+      var imgHtml = p.hero_img
+        ? '<img src="uploads/' + xe(p.hero_img) + '" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">'
+        : '';
+      var lblHtml = p.hero_img ? '' : '<span class="hz-lbl">Hero<br>Photo</span>';
+
+      html += '<div class="prow">'
+        + '<div class="hz' + hasImg + '" id="hz_' + k + '" onclick="document.getElementById(\'hf_' + k + '\').click()">'
+            + imgHtml + lblHtml
+          + '</div>'
+        + '<input type="file" id="hf_' + k + '" accept="image/*" style="display:none">'
+        + '<input class="fi" type="text" id="pi_' + k + '" placeholder="Player IGN" value="' + xe(p.ign || '') + '">'
+        + '<input class="fi kda-in" type="number" id="pk_' + k + '" min="0" value="' + (parseInt(p.kills)  || 0) + '" title="Kills">'
+        + '<input class="fi kda-in" type="number" id="pd_' + k + '" min="0" value="' + (parseInt(p.deaths) || 0) + '" title="Deaths">'
+        + '<input class="fi kda-in" type="number" id="pa_' + k + '" min="0" value="' + (parseInt(p.assists)|| 0) + '" title="Assists">'
+        + '</div>';
+    }
+    box.innerHTML = html;
+
+    for (var s = 1; s <= 5; s++) {
+      (function (kk) {
+        var fi = document.getElementById('hf_' + kk);
+        if (fi) fi.addEventListener('change', function () { heroPreview(this, kk); });
+      })(side + '_' + s);
+    }
+  });
+
+  swTab('A');
+}
+
+function heroPreview(input, k) {
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function (e) {
+    var zone = document.getElementById('hz_' + k);
+    zone.classList.add('got');
+    zone.innerHTML = '<img src="' + e.target.result + '" alt="" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0">';
+  };
+  reader.readAsDataURL(file);
+}
+
+function swTab(side) {
+  document.getElementById('ptA').className = 'ptab' + (side === 'A' ? ' on-a' : '');
+  document.getElementById('ptB').className = 'ptab' + (side === 'B' ? ' on-b' : '');
+  document.getElementById('ppA').className = 'ppanel' + (side === 'A' ? ' vis' : '');
+  document.getElementById('ppB').className = 'ppanel' + (side === 'B' ? ' vis' : '');
+}
+
+/* Save Players */
+async function savePlayers() {
+  if (!gEditId) { toast('Save the match first.', 'err'); return; }
+
+  var btn = document.getElementById('btnSavePl');
+  btn.innerHTML = '<span class="spin"></span> Saving…'; btn.disabled = true;
+
+  var fd = new FormData();
+  fd.append('match_id', gEditId);
+
+  ['A', 'B'].forEach(function (side) {
+    for (var slot = 1; slot <= 5; slot++) {
+      var k = side + '_' + slot;
+      var ign = document.getElementById('pi_' + k);
+      var kl  = document.getElementById('pk_' + k);
+      var dl  = document.getElementById('pd_' + k);
+      var al  = document.getElementById('pa_' + k);
+      var fi  = document.getElementById('hf_' + k);
+
+      if (!ign) continue;
+
+      fd.append('ign['     + k + ']', ign.value.trim());
+      fd.append('kills['   + k + ']', kl.value  || '0');
+      fd.append('deaths['  + k + ']', dl.value  || '0');
+      fd.append('assists[' + k + ']', al.value  || '0');
+      fd.append('badge['   + k + ']', 'none');
+      if (fi && fi.files && fi.files.length) fd.append('hero_' + k, fi.files[0]);
+    }
+  });
+
+  var d = await api('api.php?action=save_players', { method: 'POST', body: fd });
+  btn.innerHTML = '💾 Save Player Details'; btn.disabled = false;
+
+  if (d.error) { toast(d.error, 'err'); return; }
+  toast('Player details saved!', 'ok');
+}
+
+/* ════════════════════════════════════════════
+   DELETE
+════════════════════════════════════════════ */
+function openDelete(id, label) {
+  gDelId = +id;
+  document.getElementById('delLbl').textContent = label;
+  openOv('ovDel');
+}
+
+async function doDelete() {
+  if (!gDelId) return;
+  var fd = new FormData(); fd.append('id', gDelId);
+  var d = await api('api.php?action=delete', { method: 'POST', body: fd });
+  closeOv('ovDel');
+  if (d.error) { toast(d.error, 'err'); return; }
+  toast('Match deleted.', 'ok');
+  gDelId = null;
+  loadMatches(); loadRounds();
+}
+
+/* ════════════════════════════════════════════
+   WINNER DROPDOWN SYNC
+════════════════════════════════════════════ */
+function syncW(sel) {
+  var a   = document.getElementById('fA').value.trim() || 'Team A';
+  var b   = document.getElementById('fB').value.trim() || 'Team B';
+  var el  = document.getElementById('fW');
+  var cur = (sel !== undefined) ? sel : el.value;
+  el.innerHTML = '<option value="">— Select Winner —</option>'
+    + '<option value="' + xe(a) + '"' + (cur === a ? ' selected' : '') + '>' + xe(a) + '</option>'
+    + '<option value="' + xe(b) + '"' + (cur === b ? ' selected' : '') + '>' + xe(b) + '</option>';
+}
+
+/* ════════════════════════════════════════════
+   LOGO UPLOAD HELPERS
+════════════════════════════════════════════ */
+function previewLogo(input, prevId, zoneId, lblId) {
+  var file = input.files[0];
+  if (!file) return;
+  var rd = new FileReader();
+  rd.onload = function (e) {
+    var img = document.getElementById(prevId);
+    img.src = e.target.result;
+    document.getElementById(zoneId).classList.add('got');
+    document.getElementById(lblId).textContent = file.name;
+  };
+  rd.readAsDataURL(file);
+}
+
+function setLogoPreview(prevId, zoneId, lblId, src) {
+  var img = document.getElementById(prevId);
+  img.src = src;
+  document.getElementById(zoneId).classList.add('got');
+  document.getElementById(lblId).textContent = 'Current logo (click to change)';
+}
+
+function resetLogo(fileId, prevId, zoneId, lblId) {
+  var old = document.getElementById(fileId);
+  var neo = old.cloneNode(false);
+  neo.addEventListener('change', function () { previewLogo(this, prevId, zoneId, lblId); });
+  old.parentNode.replaceChild(neo, old);
+  var img = document.getElementById(prevId);
+  img.src = '';
+  document.getElementById(zoneId).classList.remove('got');
+  document.getElementById(lblId).textContent = '📁 Click to upload';
+}
+
+/* ════════════════════════════════════════════
+   MODAL HELPERS
+════════════════════════════════════════════ */
+function openOv(id)  { document.getElementById(id).classList.add('open'); }
+function closeOv(id) { document.getElementById(id).classList.remove('open'); }
+function ovc(e, id)  { if (e.target === document.getElementById(id)) closeOv(id); }
+
+/* ════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════ */
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'show ' + (type || 'ok');
+  clearTimeout(t._t);
+  t._t = setTimeout(function () { t.className = ''; }, 3200);
+}
+
+/* ════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════ */
+function xe(s) {
+  if (s == null) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function ini(n) {
+  return ((n || '?') + '').split(' ').map(function (w) { return w[0] || ''; }).join('').toUpperCase().slice(0, 2) || '?';
+}
+function debounce(fn, ms) {
+  var t;
+  return function () {
+    var a = arguments;
+    clearTimeout(t);
+    t = setTimeout(function () { fn.apply(null, a); }, ms);
+  };
+}
+</script>
+</body>
+</html>
