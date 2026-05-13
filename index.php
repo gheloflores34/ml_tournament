@@ -702,4 +702,20 @@ label.lbl{
   border:2px solid rgba(239,154,154,.25);
   display:flex;align-items:center;justify-content:center;
   font-size:1.6rem;margin:0 auto 14px;
+}/* ═══════════════ TOAST ═══════════════ */
+#toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--panel2);
+  border:1px solid var(--border2);
+  border-radius:9px;
+  padding:12px 18px;font-family:'Rajdhani',sans-serif;font-size:.88rem;
+  font-weight:600;letter-spacing:.04em;
+  z-index:999;
+  transform:translateY(70px);opacity:0;
+  transition:all .28s cubic-bezier(.16,1,.3,1);
+  pointer-events:none;max-width:310px;
+  box-shadow:0 8px 30px rgba(0,0,0,.5);
 }
+#toast.show{transform:none;opacity:1}
+#toast.ok{border-color:var(--win);color:var(--win);box-shadow:0 8px 30px rgba(0,230,118,.15)}
+#toast.err{border-color:#ef9a9a;color:#ef9a9a;box-shadow:0 8px 30px rgba(239,83,80,.15)}
