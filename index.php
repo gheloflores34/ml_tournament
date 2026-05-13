@@ -719,3 +719,329 @@ label.lbl{
 #toast.show{transform:none;opacity:1}
 #toast.ok{border-color:var(--win);color:var(--win);box-shadow:0 8px 30px rgba(0,230,118,.15)}
 #toast.err{border-color:#ef9a9a;color:#ef9a9a;box-shadow:0 8px 30px rgba(239,83,80,.15)}
+/* ═══════════════ SPINNER ═══════════════ */
+.spin{
+  display:inline-block;width:16px;height:16px;
+  border:2px solid rgba(66,165,245,.25);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:sp .65s linear infinite;vertical-align:middle;
+}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ═══════════════ SCROLLBAR ═══════════════ */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--navy)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--blue2)}
+
+/* ═══════════════ RESPONSIVE ═══════════════ */
+@media(max-width:640px){
+  .fg{grid-template-columns:1fr}
+  thead th:nth-child(3),td:nth-child(3){display:none}
+  .prow{grid-template-columns:48px 1fr 46px 46px 46px}
+  .sb-cols,.sb-row{grid-template-columns:44px 1fr 80px}
+  .d-banner{padding:14px 16px 12px}
+  .d-logo{width:44px;height:44px}
+  .d-name{font-size:.9rem}
+  .hdr-corner{display:none}
+  .d-vs-hex{width:38px;height:38px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════ HEADER ═══════ -->
+<header>
+  <img class="hdr-bg" src="ml_logo.png" alt="">
+  <div class="hdr-corner left"></div>
+  <div class="hdr-corner right"></div>
+  <div class="hdr-inner">
+    <img class="hdr-logo" src="ml_logo.png" alt="ML">
+    <div class="hdr-title">Tournament Results</div>
+    <div class="hdr-sub">Mobile Legends &nbsp;·&nbsp; 5v5 MOBA &nbsp;·&nbsp; PH</div>
+    <div class="hdr-line"></div>
+  </div>
+</header>
+
+<!-- ═══════ MAIN ═══════ -->
+<div class="wrap">
+
+  <!-- Stats row -->
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n" id="sTotal">—</div>
+      <div class="stat-l">Matches</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" id="sRounds">—</div>
+      <div class="stat-l">Rounds</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n" id="sTeams">—</div>
+      <div class="stat-l">Teams</div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="sw">
+      <input type="text" id="q" placeholder="Search team or winner…">
+    </div>
+    <select class="rf" id="rf"><option value="">All Rounds</option></select>
+    <button class="btn btn-primary" onclick="openCreate()">&#xFF0B; Add Match</button>
+  </div>
+
+  <!-- Section header -->
+  <div class="section-hdr">
+    <div class="section-hdr-line"></div>
+    <div class="section-hdr-txt">Match Records</div>
+    <div class="section-hdr-line" style="background:linear-gradient(90deg,var(--border),transparent);transform:scaleX(-1)"></div>
+  </div>
+
+  <!-- Table -->
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th><th>Team A</th><th>vs</th><th>Team B</th>
+          <th>Score</th><th>Winner</th><th>Round</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbl">
+        <tr><td colspan="8"><div class="empty-row"><span class="spin"></span></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     DETAIL MODAL
+════════════════════════════════════════════════════ -->
+<div class="ov" id="ovDetail" onclick="ovc(event,'ovDetail')">
+  <div class="modal dm">
+
+    <!-- Banner -->
+    <div class="d-banner">
+      <div class="d-side" id="dSideA">
+        <img class="d-logo" id="dLogoA" src="" alt="" style="display:none">
+        <div class="d-logo" id="dLogoPHA" style="display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;color:var(--muted)">??</div>
+        <div class="d-name" id="dNameA">—</div>
+      </div>
+
+      <div class="d-vs">
+        <div class="d-vs-hex">
+          <div class="d-vs-txt">VS</div>
+        </div>
+      </div>
+
+      <div class="d-side right" id="dSideB">
+        <div class="d-name" id="dNameB">—</div>
+        <img class="d-logo" id="dLogoB" src="" alt="" style="display:none">
+        <div class="d-logo" id="dLogoPHB" style="display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:700;color:var(--muted)">??</div>
+      </div>
+
+      <button class="mc" onclick="closeOv('ovDetail')" style="position:absolute;top:14px;right:16px">&#x2715;</button>
+    </div>
+
+    <!-- Score strip -->
+    <div class="d-score">
+      <div class="d-sv" id="dSA">0</div>
+      <div class="d-colon">:</div>
+      <div class="d-sv" id="dSB">0</div>
+      <div style="margin-left:20px">
+        <div class="d-wlbl">Winner</div>
+        <div class="d-wname" id="dWinner">—</div>
+      </div>
+    </div>
+
+    <!-- Scoreboard body -->
+    <div id="dBody"><div class="empty-row" style="padding:40px"><span class="spin"></span></div></div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     ADD / EDIT MODAL
+════════════════════════════════════════════════════ -->
+<div class="ov" id="ovForm" onclick="ovc(event,'ovForm')">
+  <div class="modal em">
+    <div class="mh">
+      <span class="mt" id="fmTitle">Add Match</span>
+      <button class="mc" onclick="closeOv('ovForm')">&#x2715;</button>
+    </div>
+    <div class="mb">
+
+      <!-- Main match fields -->
+      <div class="fg">
+        <div class="fgrp">
+          <label class="lbl">Team A Name</label>
+          <input class="fi" type="text" id="fA" placeholder="e.g. Alpha Warriors" oninput="syncW()">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Team B Name</label>
+          <input class="fi" type="text" id="fB" placeholder="e.g. Iron Wolves" oninput="syncW()">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Team A Logo</label>
+          <div class="uz" id="uzA" onclick="document.getElementById('ufA').click()">
+            <img class="uz-prev" id="upA" alt="">
+            <div class="uz-lbl" id="ulA">📁 Click to upload</div>
+          </div>
+          <input type="file" id="ufA" accept="image/*" style="display:none">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Team B Logo</label>
+          <div class="uz" id="uzB" onclick="document.getElementById('ufB').click()">
+            <img class="uz-prev" id="upB" alt="">
+            <div class="uz-lbl" id="ulB">📁 Click to upload</div>
+          </div>
+          <input type="file" id="ufB" accept="image/*" style="display:none">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Score (Team A)</label>
+          <input class="fi" type="number" id="fSA" min="0" value="0">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Score (Team B)</label>
+          <input class="fi" type="number" id="fSB" min="0" value="0">
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Winner</label>
+          <select class="fi" id="fW"><option value="">— Select Winner —</option></select>
+        </div>
+        <div class="fgrp">
+          <label class="lbl">Round</label>
+          <input class="fi" type="text" id="fR" placeholder="e.g. Quarter Finals">
+        </div>
+      </div>
+
+      <!-- Main save -->
+      <div class="fa" style="margin-bottom:0;padding-bottom:0;border-bottom:none">
+        <button class="btn" style="background:var(--mid);color:var(--muted);border:1px solid var(--border)" onclick="closeOv('ovForm')">Cancel</button>
+        <button class="btn btn-primary" id="btnSave" onclick="saveMatch()">Save Match</button>
+      </div>
+
+      <!-- Player sub-section -->
+      <div id="pSection" style="display:none">
+        <div class="divider">
+          <div class="divider-line"></div>
+          <div class="divider-txt">⚔ Player Details (5 per team)</div>
+          <div class="divider-line"></div>
+        </div>
+        <p style="font-family:'Rajdhani',sans-serif;font-size:.8rem;color:var(--muted);margin-bottom:14px;letter-spacing:.04em">
+          Upload each player's hero image, enter their IGN and K&nbsp;/&nbsp;D&nbsp;/&nbsp;A.
+        </p>
+
+        <!-- Tabs -->
+        <div class="ptabs">
+          <button class="ptab on-a" id="ptA" onclick="swTab('A')">Team A</button>
+          <button class="ptab" id="ptB" onclick="swTab('B')">Team B</button>
+        </div>
+
+        <!-- Team A panel -->
+        <div class="ppanel vis" id="ppA">
+          <div class="pchdr">
+            <span>Hero</span><span style="text-align:left">IGN</span>
+            <span>K</span><span>D</span><span>A</span>
+          </div>
+          <div id="pgA"></div>
+        </div>
+
+        <!-- Team B panel -->
+        <div class="ppanel" id="ppB">
+          <div class="pchdr">
+            <span>Hero</span><span style="text-align:left">IGN</span>
+            <span>K</span><span>D</span><span>A</span>
+          </div>
+          <div id="pgB"></div>
+        </div>
+
+        <div class="fa">
+          <button class="btn btn-primary" id="btnSavePl" onclick="savePlayers()">&#128190; Save Player Details</button>
+        </div>
+      </div>
+
+    </div><!-- /.mb -->
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     DELETE CONFIRM MODAL
+════════════════════════════════════════════════════ -->
+<div class="ov" id="ovDel" onclick="ovc(event,'ovDel')">
+  <div class="modal cm">
+    <div class="mh">
+      <span class="mt">Delete Match</span>
+      <button class="mc" onclick="closeOv('ovDel')">&#x2715;</button>
+    </div>
+    <div class="mb" style="text-align:center">
+      <div class="del-icon">⚠️</div>
+      <p class="ct">Delete <strong id="delLbl"></strong>?<br>This action cannot be undone.</p>
+      <div class="fa" style="justify-content:center;margin-top:18px">
+        <button class="btn" style="background:var(--mid);color:var(--muted);border:1px solid var(--border)" onclick="closeOv('ovDel')">Cancel</button>
+        <button class="btn btn-del" id="btnDel">🗑 Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     JAVASCRIPT  —  identical logic, zero changes
+════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── State ── */
+var gEditId = null;
+var gDelId  = null;
+
+/* ── Boot ── */
+document.addEventListener('DOMContentLoaded', function () {
+  loadRounds();
+  loadMatches();
+
+  document.getElementById('q').addEventListener('input', debounce(loadMatches, 300));
+  document.getElementById('rf').addEventListener('change', loadMatches);
+  document.getElementById('fA').addEventListener('input', syncW);
+  document.getElementById('fB').addEventListener('input', syncW);
+  document.getElementById('btnDel').addEventListener('click', doDelete);
+
+  /* Logo file inputs */
+  document.getElementById('ufA').addEventListener('change', function () { previewLogo(this, 'upA', 'uzA', 'ulA'); });
+  document.getElementById('ufB').addEventListener('change', function () { previewLogo(this, 'upB', 'uzB', 'ulB'); });
+});
+
+/* ════════════════════════════════════════════
+   API
+════════════════════════════════════════════ */
+async function api(url, opts) {
+  try {
+    var r   = await fetch(url, opts || {});
+    var txt = await r.text();
+    return JSON.parse(txt);
+  } catch (e) {
+    return { error: 'Network/parse error' };
+  }
+}
+
+/* ════════════════════════════════════════════
+   LOAD ROUNDS (filter dropdown)
+════════════════════════════════════════════ */
+async function loadRounds() {
+  var d   = await api('api.php?action=rounds');
+  var sel = document.getElementById('rf');
+  sel.innerHTML = '<option value="">All Rounds</option>';
+  (d.data || []).forEach(function (r) {
+    var o = document.createElement('option');
+    o.value = o.textContent = r;
+    sel.appendChild(o);
+  });
+}
