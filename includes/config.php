@@ -1,14 +1,13 @@
 <?php
-// includes/config.php
+// includes/config.php — v3 Overhaul
 // ============================================
 // Database Configuration
-// Update credentials to match your setup
 // ============================================
 
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');       // Change to your MySQL username
 define('DB_PASS', '');           // Change to your MySQL password
-define('DB_NAME', 'ml_tournament');
+define('DB_NAME', 'ml_tournament1');
 
 // Upload settings
 define('UPLOAD_DIR', __DIR__ . '/../uploads/');
@@ -16,6 +15,7 @@ define('UPLOAD_URL', 'uploads/');
 define('MAX_FILE_SIZE', 2 * 1024 * 1024); // 2MB
 define('ALLOWED_TYPES', ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
 
+// ─── PDO Singleton ───────────────────────────
 function getDB(): PDO {
     static $pdo = null;
     if ($pdo === null) {
@@ -33,19 +33,26 @@ function getDB(): PDO {
     return $pdo;
 }
 
+// ─── Upload helper ───────────────────────────
 function uploadImage(array $file, string $prefix): string|false {
-    if ($file['error'] !== UPLOAD_ERR_OK) return false;
-    if ($file['size'] > MAX_FILE_SIZE) return false;
+    if ($file['error'] !== UPLOAD_ERR_OK)       return false;
+    if ($file['size'] > MAX_FILE_SIZE)           return false;
     if (!in_array($file['type'], ALLOWED_TYPES)) return false;
 
-    $ext      = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $filename = $prefix . '_' . uniqid() . '.' . $ext;
+    // Ensure upload directory exists
+    if (!is_dir(UPLOAD_DIR)) {
+        mkdir(UPLOAD_DIR, 0755, true);
+    }
+
+    $ext      = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    $filename = $prefix . '_' . bin2hex(random_bytes(7)) . '.' . $ext;
     $dest     = UPLOAD_DIR . $filename;
 
     if (!move_uploaded_file($file['tmp_name'], $dest)) return false;
     return $filename;
 }
 
+// ─── Delete helper ───────────────────────────
 function deleteImage(?string $filename): void {
     if ($filename && file_exists(UPLOAD_DIR . $filename)) {
         unlink(UPLOAD_DIR . $filename);
