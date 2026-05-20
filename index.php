@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -963,7 +963,7 @@ async function api(url,opts){
 
 /* ─── ROUNDS ───────────────────────────────────── */
 async function loadRounds(){
-  var d=await api('api.php?action=rounds');
+  var d=await api('api/api.php?action=rounds');
   var bar=document.getElementById('roundFilters'), dl=document.getElementById('roundsList');
   bar.innerHTML='<button class="rf-pill active" data-round="" onclick="filterRound(this,\'\')">All</button>';
   dl.innerHTML='';
@@ -988,7 +988,7 @@ function filterRound(btn,round){
 /* ─── MATCHES ─────────────────────────────────── */
 async function loadMatches(){
   var search=document.getElementById('q').value.trim();
-  var d=await api('api.php?action=list&'+new URLSearchParams({search:search,round:gCurrentRound}));
+  var d=await api('api/api.php?action=list&'+new URLSearchParams({search:search,round:gCurrentRound}));
   gMatches=Array.isArray(d.data)?d.data:[];
   renderStats(gMatches); gCarouselIdx=0; renderCarousel();
 }
@@ -1121,7 +1121,7 @@ async function openDetail(id){
   document.getElementById('dpPlayers').innerHTML='<div style="text-align:center;padding:60px;grid-column:1/-1"><span class="spin"></span></div>';
   document.getElementById('dpActions').innerHTML='';
 
-  var results=await Promise.all([api('api.php?action=get&id='+id),api('api.php?action=get_players&id='+id)]);
+  var results=await Promise.all([api('api/api.php?action=get&id='+id),api('api/api.php?action=get_players&id='+id)]);
   var md=results[0], pd=results[1];
   if(md.error){ toast(md.error,'err'); closeDetail(); return; }
   var m=md.data, players=Array.isArray(pd.data)?pd.data:[];
@@ -1226,7 +1226,7 @@ function badgeHtml(badge){
 
 /* ─── ASSETS ─────────────────────────────────── */
 async function loadAssets(){
-  var d=await api('api.php?action=list_assets');
+  var d=await api('api/api.php?action=list_assets');
   if(d.data){
     gAssets.hero  =(d.data||[]).filter(function(a){ return a.type==='hero';  });
     gAssets.role  =(d.data||[]).filter(function(a){ return a.type==='role';  });
@@ -1261,7 +1261,7 @@ function renderAssetGrid(){
 }
 async function updateAssetClass(id,cls){
   var fd=new FormData(); fd.append('id',id); fd.append('hero_class',cls);
-  var d=await api('api.php?action=update_asset_class',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=update_asset_class',{method:'POST',body:fd});
   if(d.success){ var a=gAssets.hero.find(function(x){ return x.id==id; }); if(a) a.hero_class=cls; renderAssetGrid(); }
   else toast(d.error||'Failed','err');
 }
@@ -1272,7 +1272,7 @@ async function uploadAsset(){
   var file=document.getElementById('assetFile').files[0];
   if(!name||!file){ toast('Name and image required','err'); return; }
   var fd=new FormData(); fd.append('type',type); fd.append('name',name); fd.append('hero_class',hclass); fd.append('file',file);
-  var d=await api('api.php?action=upload_asset',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=upload_asset',{method:'POST',body:fd});
   if(d.error){ toast(d.error,'err'); return; }
   toast(name+' uploaded!','ok');
   document.getElementById('assetName').value=''; document.getElementById('assetFile').value='';
@@ -1281,7 +1281,7 @@ async function uploadAsset(){
 async function deleteAsset(id,name){
   if(!confirm('Delete asset: '+name+'?')) return;
   var fd=new FormData(); fd.append('id',id);
-  var d=await api('api.php?action=delete_asset',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=delete_asset',{method:'POST',body:fd});
   if(d.error){ toast(d.error,'err'); return; }
   toast('Asset deleted.','ok'); await loadAssets();
 }
@@ -1307,7 +1307,7 @@ async function openEdit(id){
   gEditId=id;
   document.getElementById('fmTitle').textContent='Edit Match';
   openOv('ovForm');
-  var d=await api('api.php?action=get&id='+id);
+  var d=await api('api/api.php?action=get&id='+id);
   if(d.error){ toast(d.error,'err'); return; }
   var m=d.data;
   document.getElementById('fA').value=m.team_a; document.getElementById('fB').value=m.team_b;
@@ -1321,7 +1321,7 @@ async function openEdit(id){
   else resetLogo('ufB','upB','uzB','ulB');
   /* Load players */
   document.getElementById('pSection').style.display='block';
-  var pd=await api('api.php?action=get_players&id='+id);
+  var pd=await api('api/api.php?action=get_players&id='+id);
   renderPlayerEditor(pd.data||[],m.team_a,m.team_b);
 }
 
@@ -1342,13 +1342,13 @@ async function saveMatch(){
   if(fA.files[0]) fd.append('team_a_img',fA.files[0]);
   if(fB.files[0]) fd.append('team_b_img',fB.files[0]);
   var action=gEditId?'update':'create';
-  var d=await api('api.php?action='+action,{method:'POST',body:fd});
+  var d=await api('api/api.php?action='+action,{method:'POST',body:fd});
   btn.innerHTML='Save Match'; btn.disabled=false;
   if(d.error){ toast(d.error,'err'); return; }
   if(!gEditId&&d.id){
     gEditId=+d.id;
     document.getElementById('pSection').style.display='block';
-    var pd=await api('api.php?action=get_players&id='+gEditId);
+    var pd=await api('api/api.php?action=get_players&id='+gEditId);
     renderPlayerEditor(pd.data||[],document.getElementById('fA').value,document.getElementById('fB').value);
     toast('Match saved! Add players below.','ok');
     /* Immediately refresh the match list & rounds so the new match is visible
@@ -1532,7 +1532,7 @@ async function savePlayers(){
       if(rdd&&rdd.value){ var rp=rdd.value.split('|'); fd.append('role_filename['+k+']',rp[0]||''); fd.append('role_name['+k+']',rp[1]||''); }
     }
   });
-  var d=await api('api.php?action=save_players',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=save_players',{method:'POST',body:fd});
   btn.innerHTML='💾 Save Player Details'; btn.disabled=false;
   if(d.error){ toast(d.error,'err'); return; }
   toast('Player details saved!','ok');
@@ -1545,7 +1545,7 @@ function openDelete(id,label){ gDelId=+id; document.getElementById('delLbl').tex
 async function doDelete(){
   if(!gDelId) return;
   var fd=new FormData(); fd.append('id',gDelId);
-  var d=await api('api.php?action=delete',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=delete',{method:'POST',body:fd});
   closeOv('ovDel');
   if(d.error){ toast(d.error,'err'); return; }
   toast('Match deleted.','ok');
