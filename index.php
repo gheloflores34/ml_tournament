@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -299,13 +299,18 @@ body::after {
 .card-teams-row { display:flex; align-items:center; justify-content:center; gap:0; position:relative; z-index:3; }
 .card-team-block { display:flex; flex-direction:column; align-items:center; gap:13px; flex:1; position:relative; }
 
-/* Mythical Glory Trophy above winner — rendered as SVG inline */
+/* Crown above winner */
 .card-trophy {
-  position:absolute; top:-54px; left:50%; transform:translateX(-50%);
-  width:58px; height:58px;
+  position:absolute; top:-62px; left:50%; transform:translateX(-50%);
+  width:68px; height:68px;
   filter:drop-shadow(0 0 16px rgba(212,168,42,1)) drop-shadow(0 0 36px rgba(232,201,106,.6));
   animation:trophyFloat 2.5s ease-in-out infinite;
   z-index:6;
+  display:flex; align-items:center; justify-content:center;
+}
+.card-trophy img {
+  width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 0 12px rgba(212,168,42,.9));
 }
 @keyframes trophyFloat {
   0%,100% { transform:translateX(-50%) translateY(0);   filter:drop-shadow(0 0 16px rgba(212,168,42,.9)); }
@@ -468,7 +473,8 @@ body::after {
 .dp-banner-logo { width:90px; height:90px; border-radius:50%; object-fit:cover; border:2px solid rgba(255,255,255,.1); }
 .dp-banner-logo.is-winner { border-color:rgba(212,168,42,.7); filter:drop-shadow(0 0 22px rgba(212,168,42,.8)) brightness(1.14); }
 .dp-banner-logo-ph { width:90px; height:90px; border-radius:50%; background:linear-gradient(135deg,var(--mid),var(--deep)); border:2px solid var(--border2); display:flex; align-items:center; justify-content:center; font-family:'Cinzel',serif; font-size:1.2rem; font-weight:700; color:var(--muted); }
-.dp-banner-trophy { position:absolute; top:-44px; left:50%; transform:translateX(-50%); width:52px; height:52px; filter:drop-shadow(0 0 14px rgba(212,168,42,1)) drop-shadow(0 0 30px rgba(232,201,106,.65)); animation:trophyFloat 2.5s ease-in-out infinite; }
+.dp-banner-trophy { position:absolute; top:-52px; left:50%; transform:translateX(-50%); width:60px; height:60px; filter:drop-shadow(0 0 14px rgba(212,168,42,1)) drop-shadow(0 0 30px rgba(232,201,106,.65)); animation:trophyFloat 2.5s ease-in-out infinite; display:flex; align-items:center; justify-content:center; }
+.dp-banner-trophy img { width:100%; height:100%; object-fit:contain; }
 .dp-banner-flag { width:28px; height:19px; border-radius:2px; object-fit:cover; border:1px solid rgba(255,255,255,.14); }
 .dp-banner-score-num { font-family:'Cinzel',serif; font-size:3.4rem; font-weight:700; line-height:1; }
 .dp-banner-score-num.win  { color:var(--win); text-shadow:0 0 28px rgba(72,216,144,.55); }
@@ -922,37 +928,10 @@ function vsSvg(){
     +'</svg>';
 }
 
-/* ─── Mythical Glory Trophy SVG ─────────────── */
+/* ─── Crown Image ─────────────────────────────── */
 function trophySvg(size){
   size=size||56;
-  return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">'
-    +'<defs>'
-    +'<radialGradient id="tG" cx="50%" cy="35%" r="55%">'
-    +'<stop offset="0%" stop-color="#fff8c0"/>'
-    +'<stop offset="40%" stop-color="#f0d060"/>'
-    +'<stop offset="100%" stop-color="#a06010"/>'
-    +'</radialGradient>'
-    +'<linearGradient id="tG2" x1="0%" y1="0%" x2="100%" y2="100%">'
-    +'<stop offset="0%" stop-color="#e8c96a"/>'
-    +'<stop offset="100%" stop-color="#8b5e0a"/>'
-    +'</linearGradient>'
-    +'</defs>'
-    /* Shield body */
-    +'<path d="M40 6 L70 18 L70 44 Q70 64 40 74 Q10 64 10 44 L10 18 Z" fill="url(#tG)" stroke="#a06010" stroke-width="1.5"/>'
-    /* Inner shield */
-    +'<path d="M40 14 L62 23 L62 43 Q62 58 40 66 Q18 58 18 43 L18 23 Z" fill="url(#tG2)" opacity=".7"/>'
-    /* Gem diamond */
-    +'<polygon points="40,24 50,32 40,42 30,32" fill="#fff8c0" stroke="#d4a82a" stroke-width="1"/>'
-    /* Triangle accent */
-    +'<polygon points="40,20 56,36 24,36" fill="none" stroke="#f0d888" stroke-width="1" opacity=".6"/>'
-    /* Crown tips */
-    +'<polyline points="16,22 12,12 22,18" fill="none" stroke="#e8c96a" stroke-width="1.8" stroke-linecap="round"/>'
-    +'<polyline points="64,22 68,12 58,18" fill="none" stroke="#e8c96a" stroke-width="1.8" stroke-linecap="round"/>'
-    +'<line x1="28" y1="70" x2="52" y2="70" stroke="#d4a82a" stroke-width="2" stroke-linecap="round"/>'
-    +'<line x1="34" y1="70" x2="34" y2="76" stroke="#d4a82a" stroke-width="2" stroke-linecap="round"/>'
-    +'<line x1="46" y1="70" x2="46" y2="76" stroke="#d4a82a" stroke-width="2" stroke-linecap="round"/>'
-    +'<line x1="26" y1="76" x2="54" y2="76" stroke="#d4a82a" stroke-width="2.5" stroke-linecap="round"/>'
-    +'</svg>';
+  return '<img src="Crown1.png" width="'+size+'" height="'+size+'" alt="Crown" style="object-fit:contain;display:block;">';
 }
 
 /* ─── BOOT ────────────────────────────────────── */
@@ -984,7 +963,7 @@ async function api(url,opts){
 
 /* ─── ROUNDS ───────────────────────────────────── */
 async function loadRounds(){
-  var d=await api('api.php?action=rounds');
+  var d=await api('api/api.php?action=rounds');
   var bar=document.getElementById('roundFilters'), dl=document.getElementById('roundsList');
   bar.innerHTML='<button class="rf-pill active" data-round="" onclick="filterRound(this,\'\')">All</button>';
   dl.innerHTML='';
@@ -1009,7 +988,7 @@ function filterRound(btn,round){
 /* ─── MATCHES ─────────────────────────────────── */
 async function loadMatches(){
   var search=document.getElementById('q').value.trim();
-  var d=await api('api.php?action=list&'+new URLSearchParams({search:search,round:gCurrentRound}));
+  var d=await api('api/api.php?action=list&'+new URLSearchParams({search:search,round:gCurrentRound}));
   gMatches=Array.isArray(d.data)?d.data:[];
   renderStats(gMatches); gCarouselIdx=0; renderCarousel();
 }
@@ -1090,7 +1069,7 @@ function renderCarousel(){
         +'</div>'
         +'<div class="card-footer-row">'
           +'<span class="card-round-pill">'+xe(m.round)+'</span>'
-          +'<span class="card-winner-line">🏆 '+xe(m.winner)+'</span>'
+          +'<span class="card-winner-line"><img src="Crown1.png" style="width:18px;height:18px;object-fit:contain;filter:drop-shadow(0 0 6px rgba(212,168,42,.8));vertical-align:middle;margin-right:4px"> '+xe(m.winner)+'</span>'
           +'<div class="card-actions-row" onclick="event.stopPropagation()">'
             +'<button class="btn btn-sm btn-edit" onclick="openEdit('+m.id+')">✎ Edit</button>'
             +'<button class="btn btn-sm btn-del"  onclick="openDelete('+m.id+',\''+safe+'\')">🗑</button>'
@@ -1142,7 +1121,7 @@ async function openDetail(id){
   document.getElementById('dpPlayers').innerHTML='<div style="text-align:center;padding:60px;grid-column:1/-1"><span class="spin"></span></div>';
   document.getElementById('dpActions').innerHTML='';
 
-  var results=await Promise.all([api('api.php?action=get&id='+id),api('api.php?action=get_players&id='+id)]);
+  var results=await Promise.all([api('api/api.php?action=get&id='+id),api('api/api.php?action=get_players&id='+id)]);
   var md=results[0], pd=results[1];
   if(md.error){ toast(md.error,'err'); closeDetail(); return; }
   var m=md.data, players=Array.isArray(pd.data)?pd.data:[];
@@ -1205,7 +1184,7 @@ function buildTeamCol(name,img,flag,side,players,isWinner){
   var hdr='<div style="display:flex;align-items:center;gap:9px;padding:13px 22px;font-family:\'Cinzel\',serif;font-size:.66rem;font-weight:700;letter-spacing:.12em;'+colStyle+winStyle+'">'
     +logoH
     +(flag?'<img src="'+flagUrl(flag)+'" style="width:20px;height:14px;border-radius:2px;object-fit:cover;margin-left:4px" alt="" onerror="this.style.display=\'none\'">':'')
-    +(isWinner?'<span style="margin-left:auto;font-size:1rem" title="Winner">🏆</span>':'')
+    +(isWinner?'<span style="margin-left:auto" title="Winner"><img src="Crown1.png" style="width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 0 8px rgba(212,168,42,.9));vertical-align:middle"></span>':'')
     +'</div>';
   var cols='<div class="dp-col-hdr"><span>Hero</span><span>Role</span><span>Player</span><span>Badge</span><span style="text-align:center">K / D / A</span></div>';
   var filled=players.filter(function(p){ return p.ign||p.hero_img; });
@@ -1247,7 +1226,7 @@ function badgeHtml(badge){
 
 /* ─── ASSETS ─────────────────────────────────── */
 async function loadAssets(){
-  var d=await api('api.php?action=list_assets');
+  var d=await api('api/api.php?action=list_assets');
   if(d.data){
     gAssets.hero  =(d.data||[]).filter(function(a){ return a.type==='hero';  });
     gAssets.role  =(d.data||[]).filter(function(a){ return a.type==='role';  });
@@ -1282,7 +1261,7 @@ function renderAssetGrid(){
 }
 async function updateAssetClass(id,cls){
   var fd=new FormData(); fd.append('id',id); fd.append('hero_class',cls);
-  var d=await api('api.php?action=update_asset_class',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=update_asset_class',{method:'POST',body:fd});
   if(d.success){ var a=gAssets.hero.find(function(x){ return x.id==id; }); if(a) a.hero_class=cls; renderAssetGrid(); }
   else toast(d.error||'Failed','err');
 }
@@ -1293,7 +1272,7 @@ async function uploadAsset(){
   var file=document.getElementById('assetFile').files[0];
   if(!name||!file){ toast('Name and image required','err'); return; }
   var fd=new FormData(); fd.append('type',type); fd.append('name',name); fd.append('hero_class',hclass); fd.append('file',file);
-  var d=await api('api.php?action=upload_asset',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=upload_asset',{method:'POST',body:fd});
   if(d.error){ toast(d.error,'err'); return; }
   toast(name+' uploaded!','ok');
   document.getElementById('assetName').value=''; document.getElementById('assetFile').value='';
@@ -1302,7 +1281,7 @@ async function uploadAsset(){
 async function deleteAsset(id,name){
   if(!confirm('Delete asset: '+name+'?')) return;
   var fd=new FormData(); fd.append('id',id);
-  var d=await api('api.php?action=delete_asset',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=delete_asset',{method:'POST',body:fd});
   if(d.error){ toast(d.error,'err'); return; }
   toast('Asset deleted.','ok'); await loadAssets();
 }
@@ -1328,7 +1307,7 @@ async function openEdit(id){
   gEditId=id;
   document.getElementById('fmTitle').textContent='Edit Match';
   openOv('ovForm');
-  var d=await api('api.php?action=get&id='+id);
+  var d=await api('api/api.php?action=get&id='+id);
   if(d.error){ toast(d.error,'err'); return; }
   var m=d.data;
   document.getElementById('fA').value=m.team_a; document.getElementById('fB').value=m.team_b;
@@ -1342,7 +1321,7 @@ async function openEdit(id){
   else resetLogo('ufB','upB','uzB','ulB');
   /* Load players */
   document.getElementById('pSection').style.display='block';
-  var pd=await api('api.php?action=get_players&id='+id);
+  var pd=await api('api/api.php?action=get_players&id='+id);
   renderPlayerEditor(pd.data||[],m.team_a,m.team_b);
 }
 
@@ -1363,13 +1342,13 @@ async function saveMatch(){
   if(fA.files[0]) fd.append('team_a_img',fA.files[0]);
   if(fB.files[0]) fd.append('team_b_img',fB.files[0]);
   var action=gEditId?'update':'create';
-  var d=await api('api.php?action='+action,{method:'POST',body:fd});
+  var d=await api('api/api.php?action='+action,{method:'POST',body:fd});
   btn.innerHTML='Save Match'; btn.disabled=false;
   if(d.error){ toast(d.error,'err'); return; }
   if(!gEditId&&d.id){
     gEditId=+d.id;
     document.getElementById('pSection').style.display='block';
-    var pd=await api('api.php?action=get_players&id='+gEditId);
+    var pd=await api('api/api.php?action=get_players&id='+gEditId);
     renderPlayerEditor(pd.data||[],document.getElementById('fA').value,document.getElementById('fB').value);
     toast('Match saved! Add players below.','ok');
     /* Immediately refresh the match list & rounds so the new match is visible
@@ -1553,7 +1532,7 @@ async function savePlayers(){
       if(rdd&&rdd.value){ var rp=rdd.value.split('|'); fd.append('role_filename['+k+']',rp[0]||''); fd.append('role_name['+k+']',rp[1]||''); }
     }
   });
-  var d=await api('api.php?action=save_players',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=save_players',{method:'POST',body:fd});
   btn.innerHTML='💾 Save Player Details'; btn.disabled=false;
   if(d.error){ toast(d.error,'err'); return; }
   toast('Player details saved!','ok');
@@ -1566,7 +1545,7 @@ function openDelete(id,label){ gDelId=+id; document.getElementById('delLbl').tex
 async function doDelete(){
   if(!gDelId) return;
   var fd=new FormData(); fd.append('id',gDelId);
-  var d=await api('api.php?action=delete',{method:'POST',body:fd});
+  var d=await api('api/api.php?action=delete',{method:'POST',body:fd});
   closeOv('ovDel');
   if(d.error){ toast(d.error,'err'); return; }
   toast('Match deleted.','ok');
